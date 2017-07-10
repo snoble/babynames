@@ -11,7 +11,7 @@ Dir.foreach('./') do |item|
       rows << row
     end
     names_for_year = rows
-      .select { |row| row[1] == 'F' }
+      .select { |row| row[1] == 'M' }
       .map { |row| [row[0], row[2].to_f] }
       .to_h
 
@@ -26,7 +26,7 @@ Dir.foreach('./') do |item|
         end
         max_old_year_total = [max_old_year_total, year_total].max
       end
-      if year > 1975
+      if year > 1950
         if data[:recent_max_count].nil? || (count/year_total > data[:recent_max_count]/data[:recent_max_total])
           data[:recent_max_count] = count
           data[:recent_max_total] = year_total
@@ -48,6 +48,8 @@ names.each_value do |data|
     p = count == 0 ? 0 : count/total
     (count == 0 ? 0 : count*Math.log(p)) + (total - count)*Math.log(1 - p)
   end
+  data[:recent_max_rate] = recent_max_count.to_f / recent_max_total
+  data[:old_max_rate] = old_max_count.to_f / old_max_total
   data[:llr] = llr_component(old_max_count, old_max_total) +
     llr_component(recent_max_count, recent_max_total) -
     llr_component(old_max_count + recent_max_count, old_max_total + recent_max_total)
