@@ -18,7 +18,7 @@ Dir.foreach('./') do |item|
     year_total = names_for_year.values.reduce(&:+)
     names_for_year.each do |name, count|
       data = (names[name] ||= {})
-      if year <= 1925
+      if year <= 1935
         if data[:old_max_count].nil? || (count/year_total > data[:old_max_count]/data[:old_max_total])
           data[:old_max_count] = count
           data[:old_max_total] = year_total
@@ -26,7 +26,7 @@ Dir.foreach('./') do |item|
         end
         max_old_year_total = [max_old_year_total, year_total].max
       end
-      if year > 1950
+      if year > 1951
         if data[:recent_max_count].nil? || (count/year_total > data[:recent_max_count]/data[:recent_max_total])
           data[:recent_max_count] = count
           data[:recent_max_total] = year_total
@@ -35,7 +35,7 @@ Dir.foreach('./') do |item|
         max_recent_year_total = [max_recent_year_total, year_total].max
       end
     end
-    p year
+    STDERR.puts year
   end
 end
 
@@ -57,7 +57,9 @@ end
 
 names
   .to_a
-  .select { |name, data| (data[:old_max_count] || 0) > (data[:recent_max_count] || 0) }
+  .select { |name, data| (data[:old_max_rate] || 0) > (data[:recent_max_rate] || 0) }
+  .select { |name, data| (data[:old_max_count] || 0) > 50 }
+  .select { |name, data| data[:recent_max_rate] < 0.0001 }
   .sort_by { |name, data| data[:llr] }
   .reverse[0 .. 500]
   .each { |name, data| p "#{name}: #{data}" }
