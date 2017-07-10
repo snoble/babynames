@@ -1,4 +1,5 @@
 require 'csv'
+require 'terminal-table'
 
 names = {}
 max_old_year_total = 0
@@ -26,7 +27,7 @@ Dir.foreach('./') do |item|
         end
         max_old_year_total = [max_old_year_total, year_total].max
       end
-      if year > 1951
+      if year > 1965
         if data[:recent_max_count].nil? || (count/year_total > data[:recent_max_count]/data[:recent_max_total])
           data[:recent_max_count] = count
           data[:recent_max_total] = year_total
@@ -55,11 +56,21 @@ names.each_value do |data|
     llr_component(old_max_count + recent_max_count, old_max_total + recent_max_total)
 end
 
-names
+rows = names
   .to_a
   .select { |name, data| (data[:old_max_rate] || 0) > (data[:recent_max_rate] || 0) }
   .select { |name, data| (data[:old_max_count] || 0) > 50 }
-  .select { |name, data| data[:recent_max_rate] < 0.0001 }
+  .select { |name, data| data[:recent_max_rate] < 0.001 }
   .sort_by { |name, data| data[:llr] }
   .reverse[0 .. 500]
-  .each { |name, data| p "#{name}: #{data}" }
+  .map do |name, data|
+    [
+      name,
+      "%.2e" % (data[:old_max_rate] || 0),
+      data[:old_max_year],
+      "%.2e" % (data[:recent_max_rate] || 0),
+      data[:recent_max_year]
+    ]
+   end
+
+puts Terminal::Table.new :rows => rows, :headings => ['Name', 'Old peak rate', 'Old peak year', 'Recent peak rate', 'Recent peak year']
