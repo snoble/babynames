@@ -12,7 +12,7 @@ Dir.foreach('./') do |item|
       rows << row
     end
     names_for_year = rows
-      .select { |row| row[1] == 'M' }
+      .select { |row| row[1] == 'F' }
       .map { |row| [row[0], row[2].to_f] }
       .to_h
 
